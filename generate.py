@@ -23,7 +23,7 @@ class Host:
         self.port = random.randint(0, 100)
     def new_message(self, ts):
         dst = random.choice(self.partners)
-        crc = self.crc_rng.randrange(0, 4000000000)
+        crc = self.crc_rng.randrange(0, 4294967296)
         return Message(ts, self, dst, crc)
     def __str__(self):
     	return f"{self.ip}:{self.port}"
