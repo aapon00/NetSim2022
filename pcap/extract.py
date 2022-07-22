@@ -1,77 +1,78 @@
 #!/usr/bin/env python3
 
-import dpkt
-from dpkt.utils import mac_to_str, inet_to_str
-import struct
+import argparse
+import scapy.all
+import csv
 
 def arguments():
-	import argparse
 	ap = argparse.ArgumentParser()
 	ap.add_argument('infile', type=str)
+	ap.add_argument('-o', '--outfile', type=str)
+	ap.add_argument('--quiet', action='store_true')
+	ap.add_argument('--limit', type=int, default=-1)
 	return ap.parse_args()
 
+def fmt(p):
+	return f"{p['ts']:>8}  {str(p['src']):>15}:{str(p['sport']):<5}  {str(p['dst']):>15}:{str(p['dport']):<5}  {p['len']:>4}  {p['crc']:>5}"
 
 def main():
 	args = arguments()
 
-	payloads = []
+	packet_list = scapy.all.rdpcap(args.infile, count=args.limit)
+	first_ts = None
+	rows = []
+	f = None
 
-	with open(args.infile, 'rb') as f:
-		pcap = dpkt.pcap.Reader(f)
-		ip = dpkt.ip.IP()
-		print(dir(pcap))
-		print(pcap.snaplen)
+	fieldnames = [
+		'ts',
+		'src',
+		'sport',
+		'dst',
+		'dport',
+		'len',
+		'crc',
+	]
 
-		for ts, buf in pcap:
-			try:
-				eth = dpkt.ethernet.Ethernet(buf)
-			except dpkt.dpkt.NeedData as e:
+	try:
+		if args.outfile:
+			f = open(args.outfile, 'w')
+			writer = csv.writer(f)
+			writer.writerow(fieldnames)
+
+		if not args.quiet:
+			# print a header
+			print(fmt({k:k for k in fieldnames}))
+
+		for pkt in packet_list:
+			if 'IP' not in pkt or 'TCP' not in pkt:
 				continue
 
-#			print('Ethernet Frame: ', mac_to_str(eth.src), mac_to_str(eth.dst), eth.type, len(eth.data))
-#			continue
+			if first_ts is None:
+				first_ts = pkt.time
 
-#			fields = struct.unpack("!BBH", eth.data[:4])
-#			print(f"version: {fields[0] >> 4}")
-#			print(f"IHL:     {fields[0] & 15}")
+			row = (
+				pkt.time - first_ts,
+				pkt.src,
+				pkt.sport,
+				pkt.dst,
+				pkt.dport,
+				pkt['IP'].len,
+				pkt['TCP'].chksum,
+			)
 
-#			print(fields)
-#			print(eth.data.hex())
-#			ip.unpack(eth.data)
+			if args.outfile:
+				writer.writerow(row)
 
-#			print(eth.data.__class__.__name__)
+			if not args.quiet:
+				print(fmt({fieldnames[i]:row[i] for i in range(len(row))}))
+	except:
+		raise
+	finally:
+		if args.outfile:
+			f.close()
 
-			if not isinstance(eth.data, dpkt.ip.IP):
-				continue
 
-			ip = eth.data
-			print(dir(ip))
 
-			if not isinstance(ip.data, dpkt.tcp.TCP):
-				print('not TCP packet')
-
-			tcp = ip.data
-			print(dir(tcp))
-			print('IP: %s -> %s   (len=%d ttl=%d DF=%d MF=%d offset=%d)\n' %
-              (inet_to_str(ip.src), inet_to_str(ip.dst), ip.len, ip.ttl, ip.df, ip.mf, ip.offset))
-			print(f"TCP: ")
-
-def main2():
-	args = arguments()
-
-	import scapy.utils
-#	pcap = scapy.rdpcap(args.infile)
-#	with open(args.infile, 'rb') as f:
-#		pcap = dpkt.pcap.Reader(f)
-
-	pcap = scapy.utils.rdpcap(args.infile)
-	sessions = pcap.sessions()
-	print(sessions)
-
-	for session in sessions:
-		dir(session)
-#		for packet in sessions[session]:
-#			print(packet)
 
 if __name__ == '__main__':
-	main2()
+	main()
