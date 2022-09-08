@@ -4,7 +4,7 @@ import os
 import argparse
 import scapy.all
 
-from tcp.tcp_state import Flow
+from tcp.flow import Flow
 
 def arguments():
 	ap = argparse.ArgumentParser()
