@@ -41,6 +41,7 @@ def main():
 
 			if args.checkpoint and reader.n_read % args.checkpoint == 0:
 				print(f"in: {reader.n_read}  out: {count}")
+				writer.flush()
 
 	except:
 		raise
