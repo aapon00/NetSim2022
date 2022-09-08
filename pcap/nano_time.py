@@ -23,7 +23,7 @@ def main():
 	try:
 		reader = Reader(args.infile, limit=args.limit)
 
-		outfile = os.path.join(args.infile.rsplit('.', 1)[0] + '.nano.pcap')
+		outfile = f"{args.infile.rsplit('.', 1)[0]}.{args.proto}{'.nano' if reader.nano else ''}.pcap"
 		writer = scapy.all.PcapWriter(
 			outfile,
 			linktype=reader.pcap.linktype,
