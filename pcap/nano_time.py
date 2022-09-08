@@ -35,17 +35,13 @@ def main():
 		writer.write_header(None)
 
 		for pkt, sec, usec in reader:
-			if 'IP' not in pkt:
-				continue
-
-			if proto not in pkt and proto != 'ALL':
-				continue
-
-			count += 1
-			writer.write_packet(pkt, sec=sec, usec=usec)
+			if 'IP' in pkt and (proto in pkt or proto == 'ALL'):
+				writer.write_packet(pkt, sec=sec, usec=usec)
+				count += 1
 
 			if args.checkpoint and reader.n_read % args.checkpoint == 0:
 				print(f"in: {reader.n_read}  out: {count}")
+
 	except:
 		raise
 	finally:
