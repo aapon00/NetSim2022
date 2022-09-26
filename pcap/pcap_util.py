@@ -2,6 +2,7 @@ import binascii
 import struct
 import socket
 import functools
+import os
 
 RECORD_HEADER_LEN = 16
 CHUNK_SIZE = 65535
@@ -75,6 +76,7 @@ class Pcap:
 	def close(self):
 		if self.f:
 			self.f.close()
+		self.f = None
 	def __enter__(self):
 		if not self.f:
 			self.open()
@@ -83,10 +85,11 @@ class Pcap:
 		self.close()
 
 class PcapWriter(Pcap):
-	def __init__(self, fn: str, **kwargs):
+	def __init__(self, fn: str, append=False, sync=False, **kwargs):
 		super().__init__(fn)
+		self.append = append
+		self.sync = sync
 		self.header = PcapHeader(None, **kwargs)
-		self._header_written = False
 	@property
 	def header(self) -> PcapHeader:
 		return self._header
@@ -95,20 +98,29 @@ class PcapWriter(Pcap):
 		self._header = header
 
 	def open(self):
-		self.f = open(self.fn, 'wb')
-	def flush(self):
-		self.f.flush()
-	def close(self):
-		self.flush()
-		self.f.close()
-	def write_header(self, _dummy=None):
+		if self.append and os.path.exists(self.fn):
+			self.len = os.path.getsize(self.fn) 
+		else:
+			self.len = 0
+		self.f = open(self.fn, f"{'a' if self.append else 'w'}b")
+	def write(self, b):
 		if self.f is None:
 			self.open()
-
-		self.f.write(bytes(self.header))
-		self._header_written = True
+		self.f.write(b)
+		self.len += len(b)
+		if self.sync:
+			self.flush()
+	def flush(self):
+		if self.f:
+			self.f.flush()
+	def close(self):
+		self.flush()
+		super().close()
+	def write_header(self, _dummy=None):
+		b = bytes(self.header)
+		self.write(b)
 	def write_packet(self, pkt, **kwargs):
-		if not self._header_written:
+		if self.len == 0:
 			self.write_header()
 
 		b = bytes(pkt)
@@ -120,7 +132,7 @@ class PcapWriter(Pcap):
 				kwargs.get('usec', pkt.header.ts_usec)
 			) + b[8:]
 
-		self.f.write(b)
+		self.write(b)
 		self.count += 1
 
 class PcapReader(Pcap):
