@@ -402,6 +402,7 @@ class L3HeaderView(PacketHeaderView):
 				struct.unpack('!BHHHBBH', b[1:12])
 			self.bsrc = b[12:16]
 			self.bdst = b[16:20]
+			self.options = b[20:len(self)]
 		# elif self.version == 6:
 		# 	self.type = 'ip6'
 		# 	self.ihl = 10
@@ -437,7 +438,9 @@ class L4HeaderView(PacketHeaderView):
 			self.type = 'tcp'
 			self.sport, self.dport, self.seq, self.ack, self.data_off, self.flags, self.win, self.csum, self.urgent = \
 				struct.unpack('!HHIIBBHHH', self.record[offset:offset+20])
-			self.len = (self.data_off >> 4) * 4
+			self.flags &= ((self.data_off & 0x01) << 8)
+			self.len = ((self.data_off >> 4) & 0x0f) * 4
+			self.options = self.record[offset+20:offset+len(self)]
 		elif proto == 17:
 			self.type = 'udp'
 			self.sport, self.dport, self.total_len, self.csum = \

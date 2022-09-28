@@ -10,12 +10,13 @@ class Checksum:
     def __init__(self, data=None):
         if data is None:
             data = invert(0)
-        elif isinstance(data, Checksum):
-            self.csum = data.csum
-        elif isinstance(data, int):
+
+        if isinstance(data, int):
             self.csum = data
         elif isinstance(data, bytes):
             self.csum = invert(sum_words(data))
+        elif isinstance(data, Checksum):
+            self.csum = data.csum
         else:
             raise "Checksum initialization needs to be integer checksum or byte array."
 

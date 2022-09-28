@@ -13,8 +13,8 @@ class Address:
 
 class Flow:
     def __init__(self, pkt):
-        self.src = Address(pkt['IP'].src, pkt['IP'].sport)
-        self.dst = Address(pkt['IP'].dst, pkt['IP'].dport)
+        self.src = Address(pkt['IP'].src, pkt['TCP'].sport)
+        self.dst = Address(pkt['IP'].dst, pkt['TCP'].dport)
     def __hash__(self):
         return hash(self.ordered)
     def __eq__(self, rhs):
