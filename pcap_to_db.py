@@ -15,7 +15,7 @@ def arguments():
 	ap.add_argument('--limit_out', type=int)
 	ap.add_argument('--quiet', action='store_true')
 	ap.add_argument('--checkpoint', type=int, help='print a message every X packets')
-	ap.add_argument('--tag', type=int)
+	ap.add_argument('--tag')
 	return ap.parse_args()
 
 def main():
