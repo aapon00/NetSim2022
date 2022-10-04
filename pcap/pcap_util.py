@@ -319,26 +319,22 @@ class MutableRecord(Record):
 		return 0
 
 @functools.total_ordering
-class TimestampView:
-	def __init__(self, record: Record):
-		self.record = record
+class Timestamp:
+	def __init__(self, sec=0, usec=0, nsec=None):
+		self.sec = int(sec)
+		self._sigfigs = 9 if nsec is not None else 6
+		self.nsec = nsec if nsec is not None else usec * 1000
 	@property
-	def sec(self) -> int:
-		return self.record.header.ts_sec
-	@property
-	def usec(self) -> float:
-		return self.record.header.ts_usec / 10**(9-self.sigfigs)
-	@property
-	def nsec(self) -> int:
-		return self.record.header.ts_usec * 10**(9-self.sigfigs)
+	def usec(self) -> int:
+		return int(self.nsec / 1000)
 	@property
 	def sigfigs(self) -> int:
-		return self.record.pcap.header.sigfigs
+		return self._sigfigs
 	@property
 	def frac(self) -> float:
 		return self.usec / 10**self.sigfigs
 	def __str__(self):
-		return f"{self.sec}.{str(self.record.header.ts_usec).zfill(self.sigfigs)}"
+		return f"{self.sec}.{str(self.nsec if self.sigfigs == 9 else self.usec).zfill(self.sigfigs)}"
 	def __int__(self):
 		return self.sec
 	def __float__(self):
@@ -347,6 +343,22 @@ class TimestampView:
 		return self.sec < rhs.sec or (self.sec == rhs.sec and self.nsec < rhs.nsec)
 	def __eq__(self, rhs):
 		return self.sec == rhs.sec and self.nsec == rhs.nsec
+
+class TimestampView(Timestamp):
+	def __init__(self, record: Record):
+		self.record = record
+	@property
+	def sec(self) -> int:
+		return self.record.header.ts_sec
+	@property
+	def usec(self) -> int:
+		return int(self.record.header.ts_usec / 10**(abs(6-self.sigfigs)))
+	@property
+	def nsec(self) -> int:
+		return self.record.header.ts_usec * 10**(9-self.sigfigs)
+	@property
+	def sigfigs(self) -> int:
+		return self.record.pcap.header.sigfigs
 
 
 class RecordHeaderView:

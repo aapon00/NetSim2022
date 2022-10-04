@@ -1,3 +1,5 @@
+import socket
+import struct
 
 is_syn_pkt = lambda pkt: 'TCP' in pkt and pkt['TCP'].flags == TCP_FLAGS['S']
 is_synack_pkt = lambda pkt: 'TCP' in pkt and pkt['TCP'].flags == (TCP_FLAGS['S'] | TCP_FLAGS['A'])
@@ -11,6 +13,22 @@ class Address:
     def __init__(self, ip, port):
         self.ip = ip
         self.port = port
+    @property
+    def ip(self):
+        return self._ip
+    @ip.setter
+    def ip(self, ip):
+        if isinstance(ip, str) and ip.count('.') > 1:
+            ip = socket.inet_aton(ip)
+        if isinstance(ip, bytes):
+            ip = struct.unpack('!L', ip)[0]
+        self._ip = int(ip)
+    @property
+    def port(self):
+        return self._port
+    @port.setter
+    def port(self, port):
+        self._port = int(port)
     def __hash__(self):
         return hash((self.ip, self.port))
     def __lt__(self, rhs):
@@ -18,7 +36,7 @@ class Address:
     def __eq__(self, rhs):
         return self.ip == rhs.ip and self.port == rhs.port
     def __str__(self):
-        return f"{self.ip:>15}:{self.port:<5}"
+        return f"{socket.inet_ntoa(struct.pack('!L', self.ip)):>15}:{self.port:<5d}"
 
 class Flow:
     def __init__(self, pkt):
@@ -27,7 +45,8 @@ class Flow:
     def __hash__(self):
         return hash(self.ordered)
     def __lt__(self, rhs):
-        return self.src < rhs.src or (self.src == rhs.src and self.dst < rhs.dst)
+        s, r = self.ordered, rhs.ordered
+        return s[0] < r[0] or (s[0] == r[0] and s[1] < r[1])
     def __eq__(self, rhs):
         return self.ordered == rhs.ordered
     def __str__(self):
@@ -35,12 +54,6 @@ class Flow:
     @property
     def ordered(self):
         return (self.src, self.dst) if self.src < self.dst else (self.dst, self.src)
-    @property
-    def forward(self):
-        return self
-    @property
-    def reverse(self):
-        return self.__class__(self.dst, self.src)
 
 class TCPSession:
     def __init__(self, pkt=None):
