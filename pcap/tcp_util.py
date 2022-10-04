@@ -1,5 +1,6 @@
 import socket
 import struct
+from base64 import b64encode
 
 is_syn_pkt = lambda pkt: 'TCP' in pkt and pkt['TCP'].flags == TCP_FLAGS['S']
 is_synack_pkt = lambda pkt: 'TCP' in pkt and pkt['TCP'].flags == (TCP_FLAGS['S'] | TCP_FLAGS['A'])
@@ -21,7 +22,7 @@ class Address:
         if isinstance(ip, str) and ip.count('.') > 1:
             ip = socket.inet_aton(ip)
         if isinstance(ip, bytes):
-            ip = struct.unpack('!L', ip)[0]
+            ip = struct.unpack('!I', ip)[0]
         self._ip = int(ip)
     @property
     def port(self):
@@ -31,6 +32,8 @@ class Address:
         self._port = int(port)
     def __hash__(self):
         return hash((self.ip, self.port))
+    def __repr__(self):
+        return str(b64encode(struct.pack('!IH', self.ip, self.port)))[2:-1]
     def __lt__(self, rhs):
         return self.ip < rhs.ip or (self.ip == rhs.ip and self.port < rhs.port)
     def __eq__(self, rhs):
@@ -44,6 +47,9 @@ class Flow:
         self.dst = Address(pkt['IP'].dst, pkt['TCP'].dport)
     def __hash__(self):
         return hash(self.ordered)
+    def __repr__(self):
+        o = self.ordered
+        return repr(o[0]) + repr(o[1])
     def __lt__(self, rhs):
         s, r = self.ordered, rhs.ordered
         return s[0] < r[0] or (s[0] == r[0] and s[1] < r[1])

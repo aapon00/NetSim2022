@@ -15,7 +15,7 @@ def arguments():
 	ap.add_argument('--limit_in', type=int)
 	ap.add_argument('--limit_out', type=int)
 	ap.add_argument('--seconds', type=float)
-	ap.add_argument('--quiet', action='store_true')
+	ap.add_argument('--verbose', action='store_true')
 	ap.add_argument('--checkpoint', type=int, help='print a message every X packets')
 	return ap.parse_args()
 
@@ -63,17 +63,17 @@ def main():
 			'sec int', 'nsec int', 'len int',
 			'ip_version int', 'ip_hl int', 'ip_tos int', 'ip_len int', 'ip_id int', 'ip_off int',
 			'ip_ttl int', 'ip_proto int', 'ip_csum int', 'ip_src text', 'ip_dst text', 'ip_options blob',
-			'tcp_sport int', 'tcp_dpor int', 'tcp_seq int', 'tcp_ack int', 'tcp_len int', 'tcp_flags int',
+			'tcp_sport int', 'tcp_dport int', 'tcp_seq int', 'tcp_ack int', 'tcp_len int', 'tcp_flags int',
 			'tcp_win int', 'tcp_csum int', 'tcp_urgent int', 'tcp_options blob',
 			'plen int', 'pcrc int', 'flow int', 'filenum int'
 		]
 
-		db.execute(f"""CREATE TABLE IF NOT EXISTS packets({','.join(fields)}, PRIMARY KEY (sec, nsec)) WITHOUT ROWID""")
+		db.execute(f"CREATE TABLE IF NOT EXISTS packets({','.join(fields)})") #, PRIMARY KEY (sec, nsec)) WITHOUT ROWID""")
 
 		def iter_obj(reader, args):
 			flow = None
 			for pkt, filenum in reader:
-				if not args.quiet:
+				if args.verbose:
 					print(filenum, pkt.time.sec, pkt.time.nsec)
 
 				if args.checkpoint and reader.n_out % args.checkpoint == 0:
@@ -92,7 +92,7 @@ def main():
 					pkt.time.sec, pkt.time.nsec, pkt.header.orig_len,
 					ip.version, ip.ihl, ip.tos, ip.len, ip.id, ip.off, ip.ttl, ip.proto, ip.csum, ip.src, ip.dst, ip.options,
 					tcp.sport, tcp.dport, tcp.seq, tcp.ack, tcp.len, tcp.flags, tcp.win, tcp.csum, tcp.urgent, tcp.options,
-					ip.len - len(ip) - len(tcp), int(payload_checksum(pkt)), hash(flow), filenum
+					ip.len - len(ip) - len(tcp), int(payload_checksum(pkt)), repr(flow), filenum
 				)
 
 		db.executemany(f"insert into packets values({','.join(['?' for _ in fields])})", iter_obj(reader, args))
