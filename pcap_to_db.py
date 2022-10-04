@@ -73,6 +73,9 @@ def main():
 		def iter_obj(reader, args):
 			flow = None
 			for pkt, filenum in reader:
+				if not args.quiet:
+					print(filenum, pkt.time.sec, pkt.time.nsec)
+
 				if args.checkpoint and reader.n_out % args.checkpoint == 0:
 					print(f"in: {reader.n_read:9d}  out:{reader.n_out:9d}")
 
