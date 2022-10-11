@@ -460,9 +460,10 @@ class L4HeaderView(PacketHeaderView):
 			self.len = 8
 		elif proto == 1:
 			self.type = 'icmp'
-			self.mtype, self.code, self.csum, self.data = \
-				struct.unpack('!BBHI', self.record[offset:offset+8])
-			self.len = 8
+			self.mtype, self.code, self.csum = \
+				struct.unpack('!BBH', self.record[offset:offset+4])
+			self.len = min(self.record.header.incl_len - offset, 8) # may or may not have the defined "rest of header" bytes
+			self.rest = self.record[offset+4:offset+self.len] # may be 0-length
 		else:
 			self.type = None
 			raise LayerException(f"Unknown L3 protocol {proto}")
