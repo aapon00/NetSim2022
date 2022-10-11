@@ -81,7 +81,7 @@ order by flow
 			# print a header
 			print(fmt({k:k for k in fieldnames}))
 
-		for pkt in db.execute(query):
+		for count, pkt in enumerate(db.execute(query)):
 			if pkt.flow != session[0] or (pkt.flags == 2 and pkt.seq != session[1]):
 #				debug = False
 				if pkt.flags != 2:
