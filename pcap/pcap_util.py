@@ -462,7 +462,7 @@ class L4HeaderView(PacketHeaderView):
 			self.type = 'icmp'
 			self.mtype, self.code, self.csum = \
 				struct.unpack('!BBH', self.record[offset:offset+4])
-			self.len = min(self.record.header.incl_len - offset, 8) # may or may not have the defined "rest of header" bytes
+			self.len = min(len(self.record) - offset, 8) # may or may not have the defined "rest of header" bytes
 			self.rest = self.record[offset+4:offset+self.len] # may be 0-length
 		else:
 			self.type = None
