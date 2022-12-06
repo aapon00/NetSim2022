@@ -3,6 +3,7 @@ import struct
 import socket
 import functools
 import os
+from decimal import Decimal
 
 RECORD_HEADER_LEN = 16
 CHUNK_SIZE = 65535
@@ -324,6 +325,24 @@ class Timestamp:
 		self.sec = int(sec)
 		self._sigfigs = 9 if nsec is not None else 6
 		self.nsec = nsec if nsec is not None else usec * 1000
+	def from_str(s):
+		if 'e' in s.lower():
+			s = f'{float(s):.9f}'.rstrip('0.')
+		if '.' not in s:
+			s += '.0'
+		if s[-1] == '.':
+			s += '0'
+
+		sec, rem = s.split('.', 1)
+		sigfigs = 9 if len(rem) > 6 else 6
+		sec = int(sec)
+		rem = int(rem.zfill(sigfigs)[:sigfigs])
+
+		return Timestamp(
+			sec=sec,
+			usec=0 if sigfigs == 9 else rem,
+			nsec=0 if sigfigs == 6 else rem
+		)
 	@property
 	def usec(self) -> int:
 		return int(self.nsec / 1000)
@@ -332,15 +351,23 @@ class Timestamp:
 		return self._sigfigs
 	@property
 	def frac(self) -> float:
-		return self.usec / 10**self.sigfigs
+		return self.nsec / 10**self.sigfigs
 	def __str__(self):
 		return f"{self.sec}.{str(self.nsec if self.sigfigs == 9 else self.usec).zfill(self.sigfigs)}"
 	def __int__(self):
 		return self.sec
 	def __float__(self):
-		return self.sec + self.frac
+		return float(str(self))
 	def __lt__(self, rhs):
 		return self.sec < rhs.sec or (self.sec == rhs.sec and self.nsec < rhs.nsec)
+	def __add__(self, rhs):
+		return Timestamp.from_str(str(Decimal(str(self)) + Decimal(str(rhs))))
+	def __sub__(self, rhs):
+		return Timestamp.from_str(str(Decimal(str(self)) - Decimal(str(rhs))))
+#		return self.__class__(
+#			sec=self.sec - rhs.sec - int((self.nsec + rhs.nsec) / 10**9),
+#			nsec=(self.nsec - rhs.nsec) % 10**9
+#		)
 	def __eq__(self, rhs):
 		return self.sec == rhs.sec and self.nsec == rhs.nsec
 
@@ -391,11 +418,41 @@ class L2HeaderView(PacketHeaderView):
 	def __init__(self, record: Record):
 		super().__init__(record)
 		self.record = record
-		self.type = None
+		self.linktype = self.record.pcap.header.linktype
+
+		if self.linktype == 1:
+			self.type = 'ethernet'
+			self.len = 14
+		elif self.linktype == 101:
+			self.type = 'raw_ip'
+			self.len = 0
+		else:
+			self.type = None
+
+	def _update(self, offset: int):
+		self.offset = offset
+
+		if self.linktype == 1:
+			b = bytes(self)
+			self.bsrc = b[0:6]
+			self.bdst = b[6:12]
+			self.ethtype = struct.unpack('!H', b[12:14])
+	@property
+	def src(self):
+		if self.linktype == 1:
+			return ':'.join(hex(b) for b in self.bsrc)
+		else:
+			return ''
+	@property
+	def dst(self):
+		if self.linktype == 1:
+			return ':'.join(hex(b) for b in self.bdst)
+		else:
+			return ''
 	def __len__(self):
 		return 0
 	def __bytes__(self):
-		return b''
+		return self.record[self.offset:self.offset+self.len]
 
 class L3HeaderView(PacketHeaderView):
 	def __init__(self, record: Record):
@@ -404,6 +461,7 @@ class L3HeaderView(PacketHeaderView):
 		self.offset = offset
 		b = self.record[offset]
 		self.version = (b >> 4) & 0x0f
+		print(self.version)
 
 		if self.version == 4:
 			self.type = 'ip'
