@@ -3,6 +3,8 @@
 import argparse
 import csv
 import struct
+import logging as log
+from binascii import hexlify
 
 from generator.checksum import Checksum
 from pcap.pcap_util import PcapReader, Record
@@ -15,14 +17,19 @@ def arguments():
 	ap.add_argument('--limit', type=int)
 	ap.add_argument('--checkpoint', type=int, help='print a message every X packets')
 	ap.add_argument('--proto', choices=['tcp', 'udp', 'icmp', 'all'], default='tcp')
+	ap.add_argument('--relative_ts', action='store_true', help='start timestamps at zero')
+	ap.add_argument('--debug', action='store_true')
 	return ap.parse_args()
 
 def fmt(p):
 	ts = f"{p['ts']}:>012.9f" if isinstance(p['ts'], float) else p['ts']
-	return f"{ts:>12}  {p['proto']:5}  {str(p['src']):>15}:{str(p['sport']):<5}  {str(p['dst']):>15}:{str(p['dport']):<5}  {p['len']:>4}  {p['plen']:>4}  {p['crc']:>5}  {p.get('pcrc', ''):>5}"
+	return f"{ts:>17}  {p['proto']:5}  {str(p['src']):>15}:{str(p['sport']):<5}  {str(p['dst']):>15}:{str(p['dport']):<5}  {p['len']:>4}  {p['plen']:>4}  {p['crc']:>5}  {p.get('pcrc', ''):>5}"
 
 def main():
 	args = arguments()
+
+	if args.debug:
+		log.basicConfig(level=log.DEBUG)
 
 	first_ts = None
 	f = None
@@ -58,10 +65,15 @@ def main():
 			print(fmt({k:k for k in fieldnames}))
 
 		for pkt in reader:
+			log.debug(pkt.header) # record header ts/len
+			log.debug(f"{hexlify(pkt.data)}")
+
 			if 'IP' not in pkt:
+				log.debug("IP not in pkt")
 				continue
 
 			if args.proto != 'all' and args.proto not in pkt:
+				log.debug("proto not in pkt")
 				continue
 
 			count += 1
@@ -74,7 +86,7 @@ def main():
 			sec, usec = str(pkt.time).split('.', 1)
 
 			row = (
-				f"{int(sec) - first_ts}.{usec}",
+				f"{int(sec) - (first_ts if args.relative_ts else 0)}.{usec}",
 				pkt['L4'].type,
 				pkt['L3'].src,
 				pkt['L4'].sport,

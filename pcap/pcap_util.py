@@ -139,8 +139,8 @@ class PcapWriter(Pcap):
 class PcapReader(Pcap):
 	def __init__(self, fn: str):
 		super().__init__(fn)
-		self.record: Record = Record(self)
 		self.open()
+		self.record: Record = Record(self)
 		self.pos = 0
 	@property
 	def header(self) -> PcapHeader:
@@ -238,6 +238,8 @@ class BufferedPcapReader(PcapReader):
 class Record:
 	def __init__(self, pcap: PcapReader, L2=False, L3=True, L4=True):
 		self.pcap = pcap
+		if pcap.header.linktype is not None and pcap.header.linktype != 101:
+			L2 = True
 		self._pointers = {}
 		self.header = RecordHeaderView(self)
 		self.time = TimestampView(self)
@@ -399,6 +401,8 @@ class RecordHeaderView:
 		)
 	def __len__(self):
 		return RECORD_HEADER_LEN
+	def __str__(self):
+		return f"RecordHeader ts={self.ts_sec}.{self.ts_usec} len={self.incl_len}/{self.orig_len}"
 
 class PacketHeaderView:
 	def __init__(self, record: Record):
@@ -426,8 +430,12 @@ class L2HeaderView(PacketHeaderView):
 		elif self.linktype == 101:
 			self.type = 'raw_ip'
 			self.len = 0
+		elif self.linktype == 113:
+			self.type = 'linux_sll'
+			self.len = 16
 		else:
 			self.type = None
+			self.len = 0
 
 	def _update(self, offset: int):
 		self.offset = offset
@@ -437,6 +445,9 @@ class L2HeaderView(PacketHeaderView):
 			self.bsrc = b[0:6]
 			self.bdst = b[6:12]
 			self.ethtype = struct.unpack('!H', b[12:14])
+		elif self.linktype == 113:
+			b = bytes(self)
+			self.ethtype = struct.unpack('!H', b[14:16])
 	@property
 	def src(self):
 		if self.linktype == 1:
@@ -450,7 +461,7 @@ class L2HeaderView(PacketHeaderView):
 		else:
 			return ''
 	def __len__(self):
-		return 0
+		return self.len
 	def __bytes__(self):
 		return self.record[self.offset:self.offset+self.len]
 
@@ -461,7 +472,6 @@ class L3HeaderView(PacketHeaderView):
 		self.offset = offset
 		b = self.record[offset]
 		self.version = (b >> 4) & 0x0f
-		print(self.version)
 
 		if self.version == 4:
 			self.type = 'ip'
