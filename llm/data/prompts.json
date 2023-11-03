@@ -1,0 +1,167 @@
+[
+    {
+        "name": "Essential Features",
+        "prompt": "Examine the network traffic and identify the essential features like packet size, source/destination IPs, and protocols used. Generate new packets that maintain these essential features while introducing minor variations.",
+        "id": "4ec018d4-bd17-4525-b57c-cf7559da71c5"
+    },
+    {
+        "name": "Modify Payload",
+        "prompt": "Look at the network traffic, focusing particularly on the payload of the packets. Generate new packets that have similar but not identical payloads while keeping other packet attributes constant.",
+        "id": "7a846727-8c50-473b-942f-ed7e3f1b4067"
+    },
+    {
+        "name": "Timing Analysis",
+        "prompt": "Observe the timing intervals between packets in the network traffic. Create new packets that follow a similar timing pattern but with slight alterations.",
+        "id": "55e66b6b-8087-43e9-9b06-0d8097cb5776"
+    },
+    {
+        "name": "Burst Analysis",
+        "prompt": "Identify any bursts or patterns of high-activity in the network traffic. Generate new packets that mimic this high-activity behavior but are not exact replicas.",
+        "id": "0be82724-a1f5-4862-acb7-b444db37620f"
+    },
+    {
+        "name": "Anonymized Retransmission",
+        "prompt": "Review the network traffic and identify any packets that can be anonymized without losing their core characteristics. Generate new packets that are similar but anonymized.",
+        "id": "2c6b31be-f27d-4162-a39b-c2c01b98df0c"
+    },
+    {
+        "name": "Protocol Consistency",
+        "prompt": "Focus on the protocols being used in the network traffic. Create new packets that use the same protocols but have different source and destination IPs.",
+        "id": "8382c9a8-e01b-4090-93ba-51cfdf9fa48b"
+    },
+    {
+        "name": "Noise Addition",
+        "prompt": "Examine the network traffic, then generate new packets that are similar in structure and content but include slight noise or variations to make them unique.",
+        "id": "7605eb3a-0b15-4a3e-b9b7-6b75930dfeae"
+    },
+    {
+        "name": "Sequence Reconstruction",
+        "prompt": "Observe the sequence of packets in the network traffic. Generate a new sequence that mirrors the original in terms of flow and type of packets but differs in specific details.",
+        "id": "35151e51-b863-4381-ab07-7dbfad94eb1f"
+    },
+    {
+        "name": "Multi-layer Analysis",
+        "prompt": "Perform a multi-layer analysis of the network traffic, looking at both transport and application layers. Generate new packets that are consistent at each layer but include minor differences.",
+        "id": "4c8caff6-9706-4e88-87db-f6eedbc0dc01"
+    },
+    {
+        "name": "IP Jitter",
+        "prompt": "Analyze the source and destination IPs in the network traffic. Generate new packets that maintain a similar IP range but use different specific addresses.",
+        "id": "fbc2928a-a017-43d6-a37e-d8feb35a03bd"
+    },
+    {
+        "name": "Payload Pattern",
+        "prompt": "Focus on the payloads within the packet data. Identify recurring byte patterns or text strings. Generate new packets with similar but slightly altered payloads.",
+        "id": "9930b4e4-86a1-419b-b93c-00c86a728004"
+    },
+    {
+        "name": "Priority Traffic",
+        "prompt": "Identify packets that seem to be prioritized based on their QoS (Quality of Service) fields. Generate new packets that follow the same QoS settings but vary in other dimensions.",
+        "id": "27dc0ed4-f1aa-4632-ae91-444d3fcef11a"
+    },
+    {
+        "name": "Header Analysis",
+        "prompt": "Concentrate solely on the packet headers. What fields are most commonly used or modified? Generate new packets that have similar header settings but different content.",
+        "id": "c64fa36f-4283-46dc-8ffb-30be4e6ebf0b"
+    },
+    {
+        "name": "Traffic Flow",
+        "prompt": "Identify patterns in the traffic flow, such as packet rates between specific IP addresses. Generate new packets that mimic this flow but come from different IPs or ports.",
+        "id": "6e5a6764-4222-4ae0-8c3f-e58d467650be"
+    },
+    {
+        "name": "Deep Dive",
+        "prompt": "Perform a deep dive into a single session or connection within the network traffic. Generate new packets that could plausibly be part of the same session but aren't exact replicas.",
+        "id": "0c1b682c-097b-4d34-952a-52c3d3bb0c77"
+    },
+    {
+        "name": "Frequency Analysis",
+        "prompt": "Identify the frequency of each packet type, IP address, and port number. Generate new packets that maintain the same frequency distribution but with slight variations in the packet details.",
+        "id": "fd012f40-b785-4f29-ab27-a0998e086704"
+    },
+    {
+        "name": "Geographic Trends",
+        "prompt": "If applicable, identify any geographic trends in the IP addresses. Generate new packets that follow these trends but originate from different but geographically similar locations.",
+        "id": "cb72afa5-cf7d-4de6-a73f-a55f8a30d252"
+    },
+    {
+        "name": "Multi-Protocol",
+        "prompt": "Analyze the use of multiple protocols in the traffic. Generate new packets that switch between these protocols while maintaining the general characteristics of each.",
+        "id": "9cb4cf82-8330-4d4b-9ebb-73b5a326dff1"
+    },
+    {
+        "name": "Random Sampling",
+        "prompt": "Select a random sample of packets from the network traffic. Analyze their common characteristics and generate new packets that could fit within this sample.",
+        "id": "eb6c512e-8ca9-44a0-ac8b-afcf5400ec7d"
+    },
+    {
+        "name": "Temporal Patterns",
+        "prompt": "Focus on temporal patterns like the time-to-live (TTL) values or timestamp options in the packets. Generate new packets that share these temporal patterns but vary in other aspects.",
+        "id": "4beed89c-6d8c-41ad-aabf-e5232eb3e086"
+    },
+    {
+        "name": "Detailed Analysis",
+        "prompt": "Analyze the network traffic in detail. Identify recurring patterns and behaviors. Then, generate new packets that adhere to these patterns but introduce subtle variations.",
+        "id": "3367aa9f-b132-4416-8d76-b6e50b9fb2e1"
+    },
+    {
+        "name": "Red Team",
+        "prompt": "Imagine you're part of a red team exercise. What characteristics in the network traffic would you consider normal? Generate new packets that blend in with the normal traffic but with slight differences.",
+        "id": "8d4de4f5-c2e9-42eb-abec-8cfe35e331a5"
+    },
+    {
+        "name": "Sequential",
+        "prompt": "Let's take this step by step. First, describe the most frequent packet types you see. Second, identify the most common source and destination IPs. Finally, generate new packets that maintain these general characteristics but with different payloads or flags.",
+        "id": "a1eac923-0254-43d2-84f8-bb67f39f339d"
+    },
+    {
+        "name": "Summarize and Replicate",
+        "prompt": "Summarize the network traffic, focusing on the packet sizes, header fields, and payload content. After summarizing, generate new packets that are similar in these dimensions but not identical.",
+        "id": "b7629330-6160-41d8-bcc9-bf25543cdf3e"
+    },
+    {
+        "name": "Attribute-Based",
+        "prompt": "List the top attributes (such as IP addresses, ports, protocols) that stand out in the network traffic. Generate new packets that share these attributes but have different checksums, sequence numbers, or flags.",
+        "id": "bfe56998-5a3b-49f5-ad55-40147db820a3"
+    },
+    {
+        "name": "Time-based Analysis",
+        "prompt": "Look at the network traffic and identify how the packet rate changes over time. Generate new packets that simulate a similar time-based pattern but with different content.",
+        "id": "54e6efc7-698b-442c-9ef4-a502e71e588a"
+    },
+    {
+        "name": "Anomaly Analysis",
+        "prompt": "Identify any anomalies or outliers in the network traffic. Then generate new packets that would blend in with the normal traffic but have some differences that make them slightly anomalous.",
+        "id": "ed364dd7-dabb-43cd-b996-77ab0936e093"
+    },
+    {
+        "name": "Protocol Specific",
+        "prompt": "Focus on a particular protocol present in the network traffic. What are the unique characteristics of packets using this protocol? Generate new packets that are consistent with this protocol but differ in some parameters.",
+        "id": "c11776b6-7896-4b01-bb4b-05cf1f1406d1"
+    },
+    {
+        "name": "Signature-Based",
+        "prompt": "Identify common signatures or patterns that stand out in the network traffic. Generate new packets that mimic these signatures but with slight alterations.",
+        "id": "c00cdfac-aa52-4358-953c-7ee97bd7041c"
+    },
+    {
+        "name": "Traffic Behavior",
+        "prompt": "Describe the behavior of the network traffic, such as periods of high or low activity, bursts of specific packet types, or recurring sequences. Generate new packets that mimic this behavior but with unique alterations.",
+        "id": "0984c4b3-27e6-4164-9eeb-3e35960bc99a"
+    },
+    {
+        "name": "Haiku",
+        "prompt": "Write a haiku to summarize the network traffic dump. Then, create new packets in poetic form.",
+        "id": "4aa20d57-caa2-49c5-9f52-9a341461d8e6"
+    },
+    {
+        "name": "Dialogue",
+        "prompt": "Imagine a conversation between Alan Turing and Ada Lovelace discussing this network traffic dump. What would they say to each other? Generate new packets that reflect this conversation.",
+        "id": "22912985-6dd9-441d-8ad4-d046e200c834"
+    },
+    {
+        "name": "Machine Learning",
+        "prompt": "If you were to use machine learning to analyze this network traffic dump, what features would you focus on? Generate new packets based on these features.",
+        "id": "3329ca96-d929-49fd-988a-8a0f9d3d64fc"
+    }
+]
