@@ -10,6 +10,7 @@ class NetworkPacket(BaseModel):
     protocol: str
     length: int
     payload: str
+    conversationID: Optional[int] = None
 
 class NetworkPacketList(BaseModel):
     packets: List[NetworkPacket]
