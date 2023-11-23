@@ -24,6 +24,12 @@ class Models:
                 "modelArgs": {"temperature": 0.5, "model": "gpt-4"},
                 "type": "chat",
             },
+            "gpt-4-turbo": {
+                "name": "GPT-4-Turbo",
+                "modelClass": ChatOpenAI,
+                "modelArgs": {"temperature": 0.5, "model": "gpt-4-turbo"},
+                "type": "chat",
+            },
             "llama2-13b": {
                 "name": "LLaMA 2 13B",
                 "modelClass": LlamaCpp,
